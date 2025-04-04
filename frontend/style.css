@@ -1,0 +1,554 @@
+body {
+    background-image: linear-gradient(to left top, #5720b5, #4a1caa, #3d179e, #301393, #220f88, #181b89, #0c238a, #002a8a, #003d94, #0b4f9c, #2460a2, #3b70a7);
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 20px;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    font-size: 18px;
+    overflow-y: hidden;
+}
+
+.container {
+    width: 95%; /* Aumentado el ancho del contenedor */
+    max-width: 1400px; /* Aumentado el ancho máximo */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 15px 0;
+    position: relative; /* Para posicionar el título correctamente */
+}
+
+.title {
+    font-size: 48px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%; /* Usa todo el ancho disponible */
+    position: absolute; /* Posicionamiento absoluto para centrarlo correctamente */
+    left: 0;
+    letter-spacing: 1.5px;
+    padding-bottom: 25px;
+}
+
+.question {
+    font-size: 28px;
+    transform: rotate(-15deg);
+    margin-right: auto;
+    cursor: pointer;
+    transition: transform 0.3s, color 0.3s;
+    padding: 10px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    z-index: 10; /* Para que aparezca por encima del título */
+    font-family: 'Dancing Script', cursive;
+}
+
+.question:hover {
+    transform: rotate(-15deg) scale(1.1);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    color: #FFDA63;
+    border-color: #FFDA63;
+}
+
+.main-content {
+    width: 100%;
+    display: flex;
+    gap: 30px;
+    margin-bottom: 40px;
+    justify-content: space-between; /* Distribuye el espacio uniformemente */
+    margin-top: 40px; /* Espacio adicional para el título centrado */
+}
+
+.sidebar {
+    width: 300px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    flex-shrink: 0; /* Evita que los sidebars se encojan */
+}
+
+.main-panel {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    min-height: 500px; /* Aumentada la altura mínima */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease; /* Transición suave para el cambio a pantalla completa */
+}
+
+/* Estilo para el panel en pantalla completa */
+.main-panel.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    border-radius: 0;
+    padding: 50px;
+}
+
+.sidebar-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hand-icon {
+    font-size: 32px;
+}
+
+.file-list {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.file-item {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.file-item-num {
+    margin-right: 8px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.custom-input {
+    background: transparent;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    padding: 8px 0;
+}
+
+.custom-input::file-selector-button {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.custom-input::file-selector-button:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.file-name {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #ddd;
+}
+
+.modal-dec{
+    margin: 0;
+}
+
+.modal{
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.7);
+z-index: 100;
+justify-content: center;
+align-items: center;
+animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-content {
+background: linear-gradient(135deg, #29178f, #4c1dc4);
+border-radius: 20px;
+padding: 40px;
+max-width: 600px;
+width: 90%;
+box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+border: 2px solid rgba(255, 255, 255, 0.3);
+position: relative;
+text-align: center;
+animation: slideIn 0.4s ease-out;
+}
+
+.close-modal {
+position: absolute;
+top: 15px;
+right: 20px;
+font-size: 32px;
+cursor: pointer;
+color: white;
+transition: transform 0.3s ease, color 0.3s;
+}
+
+.close-modal:hover {
+color: #FFDA63;
+transform: rotate(90deg);
+}
+
+.modal-title {
+    font-size: 32px;
+    margin-bottom: 20px;
+    text-align: center;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 10px;
+    font-weight: bold;
+    color: #FFDA63;
+    }
+
+.modal-description {
+margin-bottom: 25px;
+line-height: 1.8;
+font-size: 18px;
+font-style: italic;
+}
+
+.circle-button {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 24px;
+    transition: background-color 0.3s, transform 0.3s;
+    z-index: 10; /* Asegura que esté visible en modo pantalla completa */
+}
+
+.circle-button:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 18px;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #388E3C;
+}
+
+.button.blue {
+    background-color: #00BCD4;
+}
+
+.button.blue:hover {
+    background-color: #0097A7;
+}
+
+
+
+/* Media Queries */
+@media (max-width: 1200px) {
+    .main-content {
+        gap: 20px;
+    }
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        width: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 16px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .title {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    .question {
+        margin-right: 0;
+        margin-bottom: 60px; /* Espacio para el título */
+    }
+
+    .main-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .sidebar-title {
+        font-size: 20px;
+    }
+
+    .hand-icon {
+        font-size: 28px;
+    }
+
+    .file-item-num {
+        font-size: 14px;
+    }
+
+    .custom-input {
+        font-size: 14px;
+    }
+
+    .modal-title {
+        font-size: 28px;
+    }
+
+    .modal-description {
+        font-size: 16px;
+    }
+
+    .button {
+        font-size: 16px;
+        padding: 12px 24px;
+    }
+}
+
+/* --- Estilos Adicionales para Indicadores y Estado --- */
+
+.finger-status-indicator {
+    display: inline-block;
+    width: 12px; /* Un poco más grande */
+    height: 12px;
+    border-radius: 50%;
+    background-color: transparent; /* Apagado por defecto */
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    margin-right: 6px;
+    vertical-align: middle; /* Alinear con el texto */
+    transition: background-color 0.1s ease-in-out; /* Transición rápida */
+    cursor: pointer;
+}
+
+/* Modo pantalla completa */
+.main-panel:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9); /* Más oscuro para mejor visibilidad */
+    border-radius: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ajustar el video en pantalla completa */
+.main-panel:fullscreen .video-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.main-panel:fullscreen .status-text {
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    top: 10px; /* Ajusta según necesites */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px; /* Opcional: aumentar tamaño en fullscreen */
+    color: white; /* Asegura visibilidad */
+}
+.main-panel:fullscreen #videoFeed {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain; /* Evita que se deforme */
+    max-width: none;
+    max-height: none;
+}
+
+/* Estilo para el contenedor del video y estado */
+.video-container {
+    width: 100%;
+    max-width: 640px; /* Limitar ancho máximo del video */
+    margin: 0 auto; /* Centrar */
+    text-align: center;
+}
+
+/* Estilo para el texto de estado de conexión */
+.status-text {
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Asegurar que la imagen de video no exceda el panel */
+#videoFeed {
+    display: block; /* Para que el margen auto funcione */
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #222; /* Fondo oscuro mientras carga */
+}
+
+/* Ajuste para el nombre del archivo */
+.file-name {
+    margin-left: 5px; /* Reducir espacio */
+    font-size: 12px; /* Más pequeño */
+    color: #ccc;
+    font-style: italic;
+    display: inline; /* Para que no fuerce nueva línea */
+    max-width: 100px; /* Evitar que sea muy largo */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* Ajustar el input para que deje espacio al nombre */
+.custom-input {
+   max-width: calc(100% - 25px); /* Ajustar ancho si el número está presente */
+}
+
+.file-item {
+    display: flex; /* Usar flexbox para mejor alineación */
+    align-items: center;
+}
+
+.file-item-num {
+     flex-shrink: 0; /* Evitar que el número se encoja */
+     margin-right: 5px;
+     cursor: pointer;
+}
+
+
+
+/* Estilos para el modo fullscreen del panel principal */
+.main-panel.fullscreen {
+    background-color: rgba(0, 0, 0, 0.9); /* Más oscuro en pantalla completa */
+    overflow-y: auto; /* Permitir scroll si el contenido es muy grande */
+}
+
+.main-panel.fullscreen .video-container {
+    max-width: 100% !important; /* Permitir que el video sea más grande */
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+/* Estilos básicos para asegurar que el setup se muestre correctamente */
+#cameraSetup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Fondo oscuro */
+    display: none; /* Oculto por defecto, JS lo mostrará */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Por encima de todo */
+    color: white;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+#cameraSetup h2 {
+    margin-bottom: 20px;
+    font-size: 2em;
+}
+#cameraStatusMessage {
+    margin-bottom: 15px;
+    min-height: 20px;
+    font-weight: bold;
+}
+#cameraSetup .button, #cameraSetup select {
+     margin: 5px;
+     padding: 12px 20px;
+     font-size: 1em;
+}
+#cameraSetup select {
+    min-width: 250px;
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 5px;
+}
+#infoModal .modal-title,
+#infoModal .modal-description,
+#infoModal {
+    font-family: 'Dancing Script', cursive;
+}
+/* Personalizar el botón de selección de archivos */
+.custom-input::file-selector-button {
+    content: "Cargar sonido"; /* Esto no cambia el texto, solo para referencia */
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+/* Esta clase es importante para controlar el texto después del botón */
+.custom-input {
+    content: "a" ;
+    color: transparent; /* Hace que el texto "Ningún archivo seleccionado" sea transparente */
+}
+
