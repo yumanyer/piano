@@ -426,6 +426,7 @@ async function startMediaPipeProcessing() {
 }
 
 // --- Callback de Resultados MediaPipe ---
+// --- Callback de Resultados MediaPipe ---
 function onResults(results) {
     // Limpiar canvas
     canvasCtx.save(); // Guardar estado actual del contexto (importante)
@@ -451,65 +452,80 @@ function onResults(results) {
         for (let i = 0; i < handData.length; i++) {
             const { landmarks } = handData[i];
 
-             // *** CORRECCIÓN ASIGNACIÓN DE MANO ***
-             // Izquierda en imagen (i=0) es MANO DERECHA del usuario (1-5)
-             // Derecha en imagen (i=1) es MANO IZQUIERDA del usuario (6-10)
-             const handIdStart = (i === 0) ? 1 : 6; // <-- CORREGIDO
-             // ************************************
+             // Asignación de mano corregida (1-5 para derecha usuario, 6-10 para izquierda usuario)
+             const handIdStart = (i === 0) ? 1 : 6;
 
             // --- Dibujar conexiones y landmarks ---
-            // Espejar el CANVAS TEMPORALMENTE para que el dibujo coincida con el video espejado
-            canvasCtx.save(); // Guardar estado antes de transformar
-            canvasCtx.translate(canvasElement.width, 0); // Mover origen a la derecha
-            canvasCtx.scale(-1, 1); // Escalar inversamente en X (espejar)
+            // Espejar el CANVAS TEMPORALMENTE
+            canvasCtx.save();
+            canvasCtx.translate(canvasElement.width, 0);
+            canvasCtx.scale(-1, 1);
 
             if (typeof drawConnectors !== 'undefined' && typeof HAND_CONNECTIONS !== 'undefined') {
-                // Dibujar conexiones con coordenadas normales (la transformación del canvas hace el resto)
+                // Dibujar conexiones blancas
                 drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
                                {color: '#FFFFFF', lineWidth: 2});
 
-                // Dibujar landmarks individuales (opcional, elige un color)
+                // Dibujar TODOS los landmarks en ROJO como base
                  drawLandmarks(canvasCtx, landmarks,
                                 {color: '#FF0000', // Puntos rojos
                                  fillColor: '#FF0000',
                                  lineWidth: 1,
-                                 radius: 4}); // Ajusta tamaño
-                 // Dibujar nudillos PIP con otro color
-                 const pipIndices = [MP_HAND_LANDMARKS.THUMB_IP, MP_HAND_LANDMARKS.INDEX_FINGER_PIP, MP_HAND_LANDMARKS.MIDDLE_FINGER_PIP, MP_HAND_LANDMARKS.RING_FINGER_PIP, MP_HAND_LANDMARKS.PINKY_PIP];
-                 const pipLandmarks = pipIndices.map(index => landmarks[index]).filter(Boolean); // Obtener landmarks PIP existentes
-                 drawLandmarks(canvasCtx, pipLandmarks,
-                                 {color: '#FFFF00', // Puntos amarillos
-                                 fillColor: '#FFFF00',
-                                  lineWidth: 1,
-                                  radius: 4});
+                                 radius: 4});
 
+                // --- ELIMINADO: Dibujo general de PIPs amarillos ---
+                // Ya no hacemos esto:
+                // const pipIndices = [MP_HAND_LANDMARKS.THUMB_IP, ...];
+                // const pipLandmarks = pipIndices.map(...);
+                // drawLandmarks(canvasCtx, pipLandmarks, {color: '#FFFF00', ...});
+                // ----------------------------------------------------
 
             } else { console.warn("drawConnectors o HAND_CONNECTIONS no definidos."); }
 
-            // --- Lógica y dibujo de números (DENTRO del canvas espejado) ---
+            // --- Lógica y dibujo de números y PUNTOS AMARILLOS individuales ---
             const fingerTips = [MP_HAND_LANDMARKS.THUMB_TIP, MP_HAND_LANDMARKS.INDEX_FINGER_TIP, MP_HAND_LANDMARKS.MIDDLE_FINGER_TIP, MP_HAND_LANDMARKS.RING_FINGER_TIP, MP_HAND_LANDMARKS.PINKY_TIP];
-            const fingerPip = [MP_HAND_LANDMARKS.THUMB_IP, MP_HAND_LANDMARKS.INDEX_FINGER_PIP, MP_HAND_LANDMARKS.MIDDLE_FINGER_PIP, MP_HAND_LANDMARKS.RING_FINGER_PIP, MP_HAND_LANDMARKS.PINKY_PIP];
+            // Índices PIP/IP necesarios para la lógica dedoAbajoJS
+            const fingerPipIndicesLogic = [MP_HAND_LANDMARKS.THUMB_IP, MP_HAND_LANDMARKS.INDEX_FINGER_PIP, MP_HAND_LANDMARKS.MIDDLE_FINGER_PIP, MP_HAND_LANDMARKS.RING_FINGER_PIP, MP_HAND_LANDMARKS.PINKY_PIP];
+            // NOTA: dedoAbajoJS ya fue modificado para usar MCP para el pulgar si es necesario
 
-            for (let j = 0; j < 5; j++) {
+            for (let j = 0; j < 5; j++) { // Iterar por los 5 dedos (0=pulgar)
                 const tipLandmark = landmarks[fingerTips[j]];
-                const pipLandmark = landmarks[fingerPip[j]];
+                const pipIndexForLogic = fingerPipIndicesLogic[j];
+                const pipLandmarkForLogic = landmarks[pipIndexForLogic]; // Para la lógica
 
-                if (tipLandmark && pipLandmark) {
-                    // Calcular coordenadas en el canvas (NORMALES, antes de la transformación)
-                    // La transformación del canvas se encarga de mapearlas visualmente.
+                // *** NUEVO: Determinar índice y landmark para el PUNTO AMARILLO VISUAL ***
+                // Para el pulgar (j=0), usar THUMB_MCP (índice 1)
+                // Para otros dedos (j>0), usar el índice PIP correspondiente (el mismo que usa la lógica ahora)
+                const yellowDotIndex = (j === 0) ? MP_HAND_LANDMARKS.THUMB_MCP : pipIndexForLogic;
+                const yellowDotLandmark = landmarks[yellowDotIndex];
+                // *************************************************************************
+
+                // Se necesita tipLandmark y pipLandmarkForLogic para la lógica dedoAbajo
+                if (tipLandmark && pipLandmarkForLogic) {
                     const xTip = tipLandmark.x * canvasElement.width;
                     const yTip = tipLandmark.y * canvasElement.height;
 
-                    // Dibujar número (también se dibujará espejado por la transformación del canvas)
+                    // *** NUEVO: Dibujar el PUNTO AMARILLO específico ***
+                    if (yellowDotLandmark) { // Asegurarse que el landmark exista
+                        const xYellow = yellowDotLandmark.x * canvasElement.width;
+                        const yYellow = yellowDotLandmark.y * canvasElement.height;
+                        canvasCtx.fillStyle = '#FFFF00'; // Amarillo
+                        canvasCtx.beginPath();
+                        // Usar un radio ligeramente más grande para que se vea sobre el rojo
+                        canvasCtx.arc(xYellow, yYellow, 5, 0, 2 * Math.PI);
+                        canvasCtx.fill();
+                    }
+                    // *************************************************
+
+                    // Dibujar número (sin cambios)
                     const numeroDedo = handIdStart + j;
                     canvasCtx.fillStyle = 'white';
                     canvasCtx.font = 'bold 18px Arial';
-                    // Ajustar la alineación del texto para que quede bien al espejarse
-                    canvasCtx.textAlign = 'center'; // Centrar texto horizontalmente
-                    canvasCtx.fillText(numeroDedo.toString(), xTip, yTip - 15); // Poner encima de la punta
+                    canvasCtx.textAlign = 'center';
+                    canvasCtx.fillText(numeroDedo.toString(), canvasElement.width - xTip, yTip - 15); // Ajustado para canvas espejado
 
-                    // Lógica dedo abajo (no cambia)
-                    const isDown = dedoAbajoJS(landmarks, fingerTips[j], fingerPip[j], j === 0);
+                    // Lógica dedo abajo (Usa pipIndexForLogic, que ya debería apuntar a MCP para el pulgar si se modificó dedoAbajoJS)
+                    const isDown = dedoAbajoJS(landmarks, fingerTips[j], pipIndexForLogic, j === 0);
                     const globalFingerIndex = numeroDedo - 1;
 
                     if (globalFingerIndex >= 0 && globalFingerIndex < 10) {
@@ -520,7 +536,7 @@ function onResults(results) {
             }
             // --- Fin lógica y dibujo números ---
 
-            canvasCtx.restore(); // *** IMPORTANTE: Restaurar estado del canvas (quita el espejado) ***
+            canvasCtx.restore(); // Restaurar estado del canvas (quita el espejado)
         }
     }
 
@@ -540,7 +556,6 @@ function onResults(results) {
         }
     }
     lastFingerState = [...currentFingerState]; // Actualizar estado (sin cambios)
-    // canvasCtx.restore(); // Ya no es necesario un restore global aquí
 }
 // --- Lógica dedoAbajo en JS ---
 function dedoAbajoJS(landmarks, fingerTipIdx, fingerPipIdx, isThumb = false) { // fingerPipIdx se sigue pasando pero se ignorará para el pulgar
