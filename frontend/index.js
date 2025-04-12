@@ -454,7 +454,8 @@ function onResults(results) {
              // *** CORRECCIÓN ASIGNACIÓN DE MANO ***
              // Izquierda en imagen (i=0) es MANO DERECHA del usuario (1-5)
              // Derecha en imagen (i=1) es MANO IZQUIERDA del usuario (6-10)
-             const handIdStart = (i === 0) ? 1 : 6; // <-- CORREGIDO
+            const handednessLabel = handData[i].handedness; // "Right" o "Left"
+            const handIdStart = (handednessLabel === "Right") ? 1 : 6;
              // ************************************
 
             // --- Dibujar conexiones y landmarks ---
