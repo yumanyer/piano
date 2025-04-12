@@ -76,7 +76,7 @@
                  <!-- Contenedor para superponer canvas sobre video -->
                  <div style="position: relative; width: 640px; height: 480px; margin: auto; border: 1px solid rgba(255,255,255,0.3); background-color: rgba(0,0,0,0.3);">
                      <!-- Video para mostrar el stream de la cámara (oculto visualmente si se dibuja en canvas, pero necesario para MediaPipe) -->
-                     <video id="videoFeed" autoplay playsinline style="display: block; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); /* Espejado */ visibility: hidden; /* Ocultar si dibujamos en canvas */"></video>
+                     <video id="videoFeed" autoplay playsinline style="display: block; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
                      <!-- Canvas para dibujar los resultados de MediaPipe -->
                      <canvas id="outputCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
                  </div>

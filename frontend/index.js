@@ -543,16 +543,25 @@ function onResults(results) {
     // canvasCtx.restore(); // Ya no es necesario un restore global aquí
 }
 // --- Lógica dedoAbajo en JS ---
-function dedoAbajoJS(landmarks, fingerTipIdx, fingerPipIdx, isThumb = false) {
+function dedoAbajoJS(landmarks, fingerTipIdx, fingerPipIdx, isThumb = false) { // fingerPipIdx se sigue pasando pero se ignorará para el pulgar
     try {
         const fingerTip = landmarks[fingerTipIdx];
-        const comparePip = landmarks[fingerPipIdx]; // Usamos PIP (o IP para pulgar)
 
-        if (!fingerTip || !comparePip) return false;
+        // *** MODIFICADO: Seleccionar el punto de comparación ***
+        // Si es pulgar (isThumb), usa THUMB_MCP (índice 1).
+        // Si no, usa el índice PIP/IP pasado (fingerPipIdx).
+        const compareIndex = isThumb ? MP_HAND_LANDMARKS.THUMB_MCP : fingerPipIdx;
+        const compareLandmark = landmarks[compareIndex];
+        // ****************************************************
 
-        // Ojo: En JS coords Y aumentan hacia abajo.
-        // Dedo abajo si Y de la punta es MAYOR que Y del PIP/IP
-        return fingerTip.y > comparePip.y;
+        if (!fingerTip || !compareLandmark) {
+            // Puedes añadir un log si quieres ver cuándo falta un landmark
+            // console.warn(` dedoAbajoJS: Landmark faltante - Tip: ${fingerTipIdx}, Compare: ${compareIndex}`);
+            return false; // Landmark no detectado
+        }
+
+        // Dedo abajo si Y de la punta es MAYOR (más abajo en pantalla) que Y del punto de comparación
+        return fingerTip.y > compareLandmark.y;
     } catch (error) {
         console.error("Error en dedoAbajoJS:", error);
         return false;
