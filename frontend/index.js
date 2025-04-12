@@ -550,7 +550,7 @@ function dedoAbajoJS(landmarks, fingerTipIdx, fingerPipIdx, isThumb = false) { /
         // *** MODIFICADO: Seleccionar el punto de comparación ***
         // Si es pulgar (isThumb), usa THUMB_MCP (índice 1).
         // Si no, usa el índice PIP/IP pasado (fingerPipIdx).
-        const compareIndex = isThumb ? MP_HAND_LANDMARKS.THUMB_MCP : fingerPipIdx;
+        const compareIndex = isThumb ? MP_HAND_LANDMARKS.THUMB_IP : fingerPipIdx;
         const compareLandmark = landmarks[compareIndex];
         // ****************************************************
 
