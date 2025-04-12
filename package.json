@@ -1,0 +1,6 @@
+{
+    "name": "piano",
+    "scripts": {
+      "start": "bash start.sh"
+    }
+  }
