@@ -20,7 +20,11 @@ const confirmCameraBtn = document.getElementById('confirmCameraButton');
 const cameraStatusMsg = document.getElementById('cameraStatusMessage');
 
 // --- Configuración WebSocket ---
-const WS_URL = 'ws://localhost:8765';
+// Determina la URL correcta para WebSocket basada en la URL de la página actual
+const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const wsHost = window.location.host; // Esto incluye hostname y puerto (si no es el default 80/443)
+const WS_URL = `${wsProtocol}//${wsHost}/ws`; // <- Usa la nueva ruta /ws
+console.log(`Connecting WebSocket to: ${WS_URL}`); // Log para verificar la URL
 let socket;
 
 // --- Configuración Web Audio API ---
