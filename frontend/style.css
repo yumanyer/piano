@@ -551,4 +551,80 @@ font-style: italic;
     content: "a" ;
     color: transparent; /* Hace que el texto "Ningún archivo seleccionado" sea transparente */
 }
+/* Estilos para cuando #mainPanel está en pantalla completa */
+#mainPanel:fullscreen {
+    /* Asegurar que el panel ocupe todo */
+    width: 100%;
+    height: 100%;
+    padding: 0; /* Quitar padding si lo tuviera */
+    margin: 0; /* Quitar margen */
+    background-color: #000; /* Fondo negro para las barras si el aspect ratio no coincide */
+    display: flex; /* Usar flexbox para centrar el contenido */
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Ocultar cualquier desbordamiento */
+}
+
+/* Estilos para el CONTENEDOR del video/canvas DENTRO del panel fullscreen */
+#mainPanel:fullscreen .video-container {
+    /* Permitir que crezca pero mantener estructura */
+    width: 100%;
+    height: 100%;
+    display: flex; /* Centrar el div interno con video/canvas */
+    justify-content: center;
+    align-items: center;
+    /* Quitar cualquier margen o borde que pueda tener normalmente */
+    margin: 0;
+    border: none;
+}
+
+/* Estilos para el DIV que envuelve directamente video y canvas DENTRO del panel fullscreen */
+#mainPanel:fullscreen .video-container > div {
+     /* Este div tiene position: relative en tu HTML, hay que ajustarlo */
+     position: relative; /* Mantener relative para el canvas absoluto */
+     width: 100%;        /* Ocupar todo el ancho del contenedor padre (.video-container) */
+     height: 100%;       /* Ocupar toda la altura */
+     max-width: 100vw;   /* Máximo ancho de la ventana */
+     max-height: 100vh;  /* Máximo alto de la ventana */
+}
+
+
+/* Estilos específicos para VIDEO y CANVAS DENTRO del panel fullscreen */
+#mainPanel:fullscreen #videoFeed,
+#mainPanel:fullscreen #outputCanvas {
+    /* Hacer que ocupen el máximo espacio posible DENTRO de su contenedor div,
+       manteniendo la relación de aspecto y añadiendo barras negras si es necesario */
+    position: absolute; /* Canvas sigue absoluto sobre video */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;  /* Asegurar que no se desborde del div */
+    max-height: 100%; /* Asegurar que no se desborde del div */
+    object-fit: contain; /* Muy importante: Escala manteniendo aspecto, añade barras si es necesario */
+    /* Quitar bordes/márgenes específicos de fullscreen si los hubiera */
+    border: none;
+    margin: 0;
+}
+
+/* Ocultar el botón de fullscreen cuando ya estamos en fullscreen */
+#mainPanel:fullscreen #fullscreenBtn {
+    display: none;
+}
+
+/* Vendor prefixes para compatibilidad (opcional pero recomendado) */
+#mainPanel:-webkit-full-screen {
+    width: 100%; height: 100%; padding: 0; margin: 0; background-color: #000; display: flex; justify-content: center; align-items: center; overflow: hidden;
+}
+#mainPanel:-webkit-full-screen .video-container {
+    width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; margin: 0; border: none;
+}
+#mainPanel:-webkit-full-screen .video-container > div {
+     position: relative; width: 100%; height: 100%; max-width: 100vw; max-height: 100vh;
+}
+#mainPanel:-webkit-full-screen #videoFeed,
+#mainPanel:-webkit-full-screen #outputCanvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; border: none; margin: 0;
+}
+#mainPanel:-webkit-full-screen #fullscreenBtn { display: none; }
 
