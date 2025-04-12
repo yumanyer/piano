@@ -303,7 +303,7 @@ async def handler(websocket):
 
 async def main():
     global camera_task # Indicar que usamos la global
-    host = "127.0.0.1" # Usar IP explícita puede ser más robusto
+    host = "0.0.0.0"  # Escucha en todas las interfaces de red
     port = 8765
 
     print(f"--- Iniciando Servidor WebSocket en ws://{host}:{port} ---")
