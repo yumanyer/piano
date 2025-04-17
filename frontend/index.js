@@ -314,11 +314,8 @@ async function listCameras() {
 }
 
 
-// --- Función para probar cámara (puede eliminarse si no se usa) ---
-// async function testCamera(deviceId) { ... } // Ya no es estrictamente necesaria
 
-
-// --- MODIFICADO: Event Listener Confirmar Cámara ---
+// ---  Event Listener Confirmar Cámara ---
 if (confirmCameraBtn) {
     confirmCameraBtn.addEventListener('click', async () => {
         const selectedOption = cameraSelectList.options[cameraSelectList.selectedIndex];
@@ -428,7 +425,7 @@ async function startMediaPipeProcessing() {
 // --- Callback de Resultados MediaPipe ---
 function onResults(results) {
     // Limpiar canvas
-    canvasCtx.save(); // Guardar estado actual del contexto (importante)
+    canvasCtx.save(); // Guardar estado actual del contexto 
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
     // NO dibujar la imagen de video aquí si el <video> está visible.
@@ -540,8 +537,7 @@ function onResults(results) {
             }
         }
     }
-    lastFingerState = [...currentFingerState]; // Actualizar estado (sin cambios)
-    // canvasCtx.restore(); // Ya no es necesario un restore global aquí
+    lastFingerState = [...currentFingerState];
 }
 // --- Lógica dedoAbajo en JS ---
 function dedoAbajoJS(landmarks, fingerTipIdx, fingerPipIdx, isThumb = false) { // fingerPipIdx se sigue pasando pero se ignorará para el pulgar
@@ -824,7 +820,8 @@ function stopMediaPipeProcessing() {
 if (showModalBtn) showModalBtn.addEventListener('click', openModal);
 if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
 if (confirmModalBtn) confirmModalBtn.addEventListener('click', closeModal);
-if (circleButton) circleButton.addEventListener('click', toggleFullscreen);
+if (circleButton) circleButton.addEventListener('click', toggleFullscreen); // Botón dedicado
+
 window.addEventListener('click', (event) => { // Click para activar audio y cerrar modal
     if (modal && event.target === modal) closeModal();
     if (!audioContextResumed && audioContext && audioContext.state === 'suspended') resumeAudioContext();
