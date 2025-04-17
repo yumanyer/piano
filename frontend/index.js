@@ -425,7 +425,7 @@ async function startMediaPipeProcessing() {
 // --- Callback de Resultados MediaPipe ---
 function onResults(results) {
     // Limpiar canvas
-    canvasCtx.save(); // Guardar estado actual del contexto 
+    canvasCtx.save(); // Guardar estado actual del contexto (importante)
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
     // NO dibujar la imagen de video aquí si el <video> está visible.
@@ -452,7 +452,7 @@ function onResults(results) {
              // Izquierda en imagen (i=0) es MANO DERECHA del usuario (1-5)
              // Derecha en imagen (i=1) es MANO IZQUIERDA del usuario (6-10)
             const handednessLabel = handData[i].handedness; // "Right" o "Left"
-            const handIdStart = (handednessLabel === "Right") ? 1 : 6;
+            const handIdStart = (handednessLabel === "Left") ? 1 : 6;
              // ************************************
 
             // --- Dibujar conexiones y landmarks ---
@@ -537,7 +537,8 @@ function onResults(results) {
             }
         }
     }
-    lastFingerState = [...currentFingerState];
+    lastFingerState = [...currentFingerState]; // Actualizar estado (sin cambios)
+    // canvasCtx.restore(); // Ya no es necesario un restore global aquí
 }
 // --- Lógica dedoAbajo en JS ---
 function dedoAbajoJS(landmarks, fingerTipIdx, fingerPipIdx, isThumb = false) { // fingerPipIdx se sigue pasando pero se ignorará para el pulgar
