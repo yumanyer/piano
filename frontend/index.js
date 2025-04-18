@@ -870,14 +870,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    function checkLikeStatus() {
-        fetch('/like/status')
-            .then(res => res.json())
-            .then(data => {
-                const hasLiked = data.has_liked || localStorage.getItem('hasLiked') === 'true';
-                updateLikeUI(hasLiked, data.total_likes);
-            });
+    async function checkLikeStatus() {
+        try {
+            const res = await fetch("/like/status");
+            if (!res.ok) throw new Error("No se pudo obtener el estado del like");
+            const data = await res.json();
+            if (data.liked) {
+                document.querySelector("#likeButton").disabled = true;
+                document.querySelector("#likeButton").innerText = "Ya votaste ❤️";
+            }
+        } catch (err) {
+            console.error("Error verificando like:", err);
+        }
     }
+    
 
     function sendLike() {
         fetch('/like', { method: 'POST' })

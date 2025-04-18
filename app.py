@@ -119,6 +119,12 @@ async def check_like(request):
         'total_likes': total_likes
     })
 
+async def like_status(request):
+    client_ip = request.remote
+    client_data = client_limits.get(client_ip, {"likes": 0})
+    liked = client_data["likes"] >= 1
+    return web.json_response({"liked": liked})
+
 # Ruta para obtener el estado de las sugerencias y likes
 async def handle_status(request):
     client_ip = request.remote
@@ -170,6 +176,7 @@ async def start_servers():
     app.router.add_get("/", serve_index)
     app.router.add_get("/ws", aiohttp_websocket_handler)
     app.router.add_post("/like", handle_like)
+    app.router.add_get("/like/status", like_status)
     app.router.add_get("/check_like", check_like)
     app.router.add_post("/suggest", handle_suggestion)
     app.router.add_get("/status", handle_status)
