@@ -845,111 +845,105 @@ document.addEventListener('DOMContentLoaded', function() {
     const heartCount = document.getElementById('heartCount');
     const suggestionBox = document.getElementById('suggestionBox');
     const submitSuggestionButton = document.getElementById('submitSuggestion');
-  
-    let likeCount = 0;
-  
-    heartIcon.addEventListener('click', function() {
-      likeCount++;
-      heartCount.textContent = likeCount;
-      heartIcon.style.color = '#e74c3c'; // Cambia a rojo al dar like
-    });
-  
-    submitSuggestionButton.addEventListener('click', function() {
-      const suggestion = suggestionBox.value;
-      if (suggestion.trim() !== '') {
-        // Aquí puedes enviar la sugerencia a un servidor o almacenarla localmente
-        alert('Sugerencia enviada: ' + suggestion);  // Reemplaza esto con tu lógica de envío
-        suggestionBox.value = ''; // Limpia el textarea
-      } else {
-        alert('Por favor, escribe una sugerencia.');
-      }
-    });
-  });
+    const suggestionsRemaining = document.getElementById('suggestionsRemaining');
 
-  function checkLikeStatus() {
-    fetch('/check_like', {
-        method: 'GET'
-    }).then(response => {
-        if (response.ok) {
-            const heartIcon = document.getElementById('heartIcon');
-            heartIcon.style.color = 'red';  // Cambia el color del corazón a rojo
-            heartIcon.textContent = '❤️';  // Muestra el corazón rojo
-        }
-    }).catch(error => {
-        console.error('Error al verificar el estado del like:', error);
-    });
-}
+    let likeCount = 0; // Esta variable se actualizará con el valor del servidor
+    let suggestionsLeft = 3; // Este valor también se actualizará
 
-function sendLike() {
-    const likeButton = document.getElementById('likeButton');
-    likeButton.disabled = true;
-
-    const likeData = JSON.stringify({ type: 'like' });
-    fetch('/like', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: likeData
-    }).then(response => {
-        if (response.ok) {
-            likeButton.disabled = false;
-            alert('Like enviado.');
-            const heartIcon = document.getElementById('heartIcon');
-            heartIcon.style.color = 'red';  // Cambia el color del corazón a rojo
-            heartIcon.textContent = '❤️';  // Muestra el corazón rojo
-        } else {
-            likeButton.disabled = false;
-            alert('Error al enviar like.');
-        }
-    }).catch(error => {
-        likeButton.disabled = false;
-        alert('Error al enviar like.');
-    });
-}
-
-// Al cargar la página, verifica si el usuario ya ha dado like
-window.onload = function() {
+    // Verificar si el usuario ya dio like
     checkLikeStatus();
-};
 
-  // Enviar sugerencia
-  let suggestionsLeft = 3;
+    // Verificar cuántas sugerencias quedan
+    updateSuggestionsLeft();
 
-  function updateSuggestionsLeft() {
-      const suggestionsRemaining = document.getElementById('suggestionsRemaining');
-      suggestionsRemaining.textContent = `Te quedan ${suggestionsLeft} sugerencias.`;
-  }
-  
-  function sendSuggestion() {
-      const suggestionButton = document.getElementById('submitSuggestion');
-      const suggestionBox = document.getElementById('suggestionBox');
-      if (suggestionButton && suggestionBox && suggestionsLeft > 0) {
-          suggestionButton.disabled = true;
-          const suggestionData = JSON.stringify({ type: 'suggest', text: suggestionBox.value });
-          fetch('/suggest', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: suggestionData
-          }).then(response => {
-              if (response.ok) {
-                  suggestionsLeft--;
-                  updateSuggestionsLeft(); // Actualiza el contador de sugerencias restantes
-                  suggestionButton.disabled = false;
-                  alert('Sugerencia enviada.');
-              } else {
-                  suggestionButton.disabled = false;
-                  alert('Error al enviar sugerencia.');
-              }
-          }).catch(error => {
-              suggestionButton.disabled = false;
-              alert('Error al enviar sugerencia.');
-          });
-      }
-  }
-  
-// Bloqueo de contexto/teclas (opcional)
-// document.addEventListener("contextmenu", event => event.preventDefault());
-// document.addEventListener("keydown", event => { if ((event.ctrlKey && (event.key === "u" || event.key === "s")) || event.key === "F12") event.preventDefault(); });
+    heartIcon.addEventListener('click', function() {
+        if (likeCount === 0) {
+            sendLike();
+        }
+    });
+
+    submitSuggestionButton.addEventListener('click', function() {
+        const suggestion = suggestionBox.value;
+        if (suggestion.trim() !== '') {
+            sendSuggestion(suggestion);
+        } else {
+            alert('Por favor, escribe una sugerencia.');
+        }
+    });
+
+    // Verificar si el usuario ya ha dado like
+    function checkLikeStatus() {
+        fetch('/check_like', {
+            method: 'GET'
+        }).then(response => {
+            if (response.ok) {
+                heartIcon.style.color = 'red';
+                heartIcon.textContent = '❤️';  // Corazón rojo
+            } else {
+                heartIcon.style.color = '#ccc'; // Corazón gris si no ha dado like
+            }
+        }).catch(error => {
+            console.error('Error al verificar el estado del like:', error);
+        });
+    }
+
+    // Enviar like al servidor
+    function sendLike() {
+        fetch('/like', {
+            method: 'POST'
+        }).then(response => {
+            if (response.ok) {
+                heartIcon.style.color = 'red';
+                heartIcon.textContent = '❤️';
+                alert('Like recibido.');
+                likeCount++;
+                updateHeartCount();
+            } else {
+                alert('Ya has dado like.');
+            }
+        }).catch(error => {
+            alert('Error al enviar like.');
+        });
+    }
+
+    // Actualizar el contador de likes
+    function updateHeartCount() {
+        heartCount.textContent = likeCount;
+    }
+
+    // Actualizar el contador de sugerencias restantes
+    function updateSuggestionsLeft() {
+        fetch('/status', {
+            method: 'GET'
+        }).then(response => response.json())
+        .then(data => {
+            suggestionsLeft = 3 - data.suggestions;
+            suggestionsRemaining.textContent = `Te quedan ${suggestionsLeft} sugerencias.`;
+        }).catch(error => {
+            console.error('Error al obtener el estado de las sugerencias:', error);
+        });
+    }
+
+    // Enviar sugerencia
+    function sendSuggestion(suggestionText) {
+        const suggestionData = JSON.stringify({ text: suggestionText });
+        fetch('/suggest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: suggestionData
+        }).then(response => {
+            if (response.ok) {
+                suggestionsLeft--;
+                updateSuggestionsLeft();
+                alert('Sugerencia enviada.');
+                suggestionBox.value = ''; // Limpiar el campo
+            } else {
+                alert('Error al enviar sugerencia.');
+            }
+        }).catch(error => {
+            alert('Error al enviar sugerencia.');
+        });
+    }
+});

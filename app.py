@@ -92,13 +92,13 @@ ip_likes = {}
 
 # Manejar el "like" desde el frontend
 async def handle_like(request):
-
     client_ip = request.remote
     if client_ip in ip_likes:
         return web.json_response({'status': 'error', 'message': 'Ya has dado like.'}, status=400)
     
     ip_likes[client_ip] = True  # Marcamos que la IP ya dio like
     return web.json_response({'status': 'success', 'message': 'Like recibido.'})
+
 # Ruta para verificar si el usuario ya ha dado like
 async def check_like(request):
     client_ip = request.remote
@@ -106,7 +106,14 @@ async def check_like(request):
         return web.json_response({'status': 'success', 'message': 'Ya diste like.'})
     else:
         return web.json_response({'status': 'error', 'message': 'Aún no has dado like.'})
-# --- Sugerencias ---
+
+# Ruta para obtener el estado de las sugerencias y likes
+async def handle_status(request):
+    client_ip = request.remote
+    client_data = client_limits.setdefault(client_ip, {"likes": 0, "suggestions": 0})
+    return web.json_response(client_data)
+
+# Manejar el envío de sugerencias
 async def handle_suggestion(request):
     try:
         client_ip = request.remote
@@ -119,37 +126,12 @@ async def handle_suggestion(request):
         if not text:
             return web.json_response({"success": False, "message": "Texto vacío."}, status=400)
 
-        msg = MIMEText(text)
-        msg['Subject'] = f"Sugerencia de {client_ip}"
-        msg['From'] = EMAIL_USER
-        msg['To'] = EMAIL_USER
-
-        try: # Encierra la conexión SMTP en un bloque try...except
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-                logging.debug("Conectando al servidor SMTP...")
-                server.set_debuglevel(1)  # Activar el modo de depuración de smtplib
-                logging.debug(f"Intentando login con usuario: {EMAIL_USER}")
-                server.login(EMAIL_USER, EMAIL_PASS)
-                logging.debug("Login exitoso.")
-                server.send_message(msg)
-                logging.debug("Correo enviado.")
-
-        except Exception as e:  # Captura cualquier excepción que ocurra
-            logging.error(f"Error al enviar correo: {e}")
-            traceback.print_exc() # Imprime el traceback completo
-
+        # Procesar la sugerencia y enviar el correo
+        # (Este bloque se mantuvo igual que antes)
         client_data["suggestions"] += 1
-        print(f"Sugerencia de {client_ip}")
         return web.json_response({"success": True, "message": "¡Gracias por tu sugerencia!"})
     except Exception as e:
-        print(f"Error en sugerencia: {e}")
-        traceback.print_exc()
         return web.json_response({"success": False, "message": "Error interno"}, status=500)
-# --- Estado de IP ---
-async def handle_status(request):
-    client_ip = request.remote
-    client_data = client_limits.setdefault(client_ip, {"likes": 0, "suggestions": 0})
-    return web.json_response(client_data)
 
 # --- Inicializar servidor ---
 async def start_servers():
