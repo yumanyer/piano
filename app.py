@@ -87,25 +87,37 @@ async def aiohttp_websocket_handler(request):
         print(f"WebSocket cerrado: {remote_addr}")
     return ws
 
-# Para almacenar los likes por IP (en memoria, por simplicidad)
 ip_likes = {}
+total_likes = 0  # Nuevo contador global
 
-# Manejar el "like" desde el frontend
 async def handle_like(request):
+    global total_likes
     client_ip = request.remote
     if client_ip in ip_likes:
-        return web.json_response({'status': 'error', 'message': 'Ya has dado like.'}, status=400)
-    
-    ip_likes[client_ip] = True  # Marcamos que la IP ya dio like
-    return web.json_response({'status': 'success', 'message': 'Like recibido.'})
+        return web.json_response({
+            'status': 'error',
+            'message': 'Ya has dado like.',
+            'has_liked': True,
+            'total_likes': total_likes
+        }, status=400)
 
-# Ruta para verificar si el usuario ya ha dado like
+    ip_likes[client_ip] = True
+    total_likes += 1  # Incrementar contador
+    return web.json_response({
+        'status': 'success',
+        'message': 'Like recibido.',
+        'has_liked': True,
+        'total_likes': total_likes
+    })
+
 async def check_like(request):
     client_ip = request.remote
-    if client_ip in ip_likes:
-        return web.json_response({'status': 'success', 'message': 'Ya diste like.'})
-    else:
-        return web.json_response({'status': 'error', 'message': 'Aún no has dado like.'})
+    has_liked = client_ip in ip_likes
+    return web.json_response({
+        'status': 'success' if has_liked else 'error',
+        'has_liked': has_liked,
+        'total_likes': total_likes
+    })
 
 # Ruta para obtener el estado de las sugerencias y likes
 async def handle_status(request):
@@ -118,6 +130,7 @@ async def handle_suggestion(request):
     try:
         client_ip = request.remote
         client_data = client_limits.setdefault(client_ip, {"likes": 0, "suggestions": 0})
+
         if client_data["suggestions"] >= 3:
             return web.json_response({"success": False, "message": "Máximo de sugerencias alcanzado."}, status=429)
 
@@ -126,11 +139,29 @@ async def handle_suggestion(request):
         if not text:
             return web.json_response({"success": False, "message": "Texto vacío."}, status=400)
 
-        # Procesar la sugerencia y enviar el correo
-        # (Este bloque se mantuvo igual que antes)
+        # Enviar correo
+        try:
+            msg = MIMEText(f"Sugerencia de IP {client_ip}:\n\n{text}")
+            msg["Subject"] = "Nueva sugerencia en Manus-Tiles"
+            msg["From"] = EMAIL_USER
+            msg["To"] = EMAIL_USER  # Puede ser otro correo si querés
+
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(EMAIL_USER, EMAIL_PASS)
+                server.send_message(msg)
+
+        except Exception as e:
+            logging.error("Error al enviar correo: %s", e)
+            return web.json_response({"success": False, "message": "No se pudo enviar el correo."}, status=500)
+
+        # Incrementar contador local si el correo se envió bien
         client_data["suggestions"] += 1
+        logging.info(f"[SUGGESTION] {client_ip} envió: {text}")
+
         return web.json_response({"success": True, "message": "¡Gracias por tu sugerencia!"})
+
     except Exception as e:
+        logging.error("Error interno en handle_suggestion: %s", e)
         return web.json_response({"success": False, "message": "Error interno"}, status=500)
 
 # --- Inicializar servidor ---
