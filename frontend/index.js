@@ -839,17 +839,18 @@ if (playButton) playButton.addEventListener('click', () => { // Botón Tocar -> 
     if (!audioContextResumed) initializeAudio();
 });
 
-
 document.addEventListener("DOMContentLoaded", () => {
     const heartIcon      = document.getElementById("heartIcon");
     const heartCount     = document.getElementById("heartCount");
     const suggestionBox  = document.getElementById("suggestionBox");
     const submitSugBtn   = document.getElementById("submitSuggestion");
     const suggestionsRem = document.getElementById("suggestionsRemaining");
-  
+    const nameInput      = document.getElementById("userName"); // Campo para el nombre
+    
     let suggestionsLeft = 3;
+    let clientIp = ""; // Variable para almacenar la IP del cliente
   
-    // Al cargar, traé estado de like y actualizá contador/UI
+    // Al cargar, trae estado de like y actualiza contador/UI
     async function checkLikeStatus() {
       try {
         const res  = await fetch("/like/status");
@@ -861,7 +862,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   
-    // Al clickear corazón
+    // Obtener la IP del cliente
+    async function getClientIp() {
+      try {
+        const res = await fetch("/get-client-ip");
+        const data = await res.json();
+        clientIp = data.ip || "Desconocido";  // Si no se puede obtener, usamos "Desconocido"
+      } catch (e) {
+        console.error("Error al obtener IP del cliente:", e);
+        clientIp = "Desconocido";
+      }
+    }
+  
+    // Al hacer click en el corazón
     heartIcon.addEventListener("click", () => {
       if (!localStorage.getItem("hasLiked")) {
         sendLike();
@@ -886,20 +899,22 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   
-    // Pinta corazón y número
+    // Actualiza la UI del corazón y el contador
     function updateLikeUI(hasLiked, totalLikes) {
       heartCount.textContent = totalLikes;
       if (hasLiked) heartIcon.classList.add("liked");
       else          heartIcon.classList.remove("liked");
     }
   
-    // Sugerencias
-    submitSugBtn.addEventListener("click", () => {
+    // Enviar sugerencia con nombre opcional
+    submitSugBtn.addEventListener("click", async () => {
       const text = suggestionBox.value.trim();
+      const name = nameInput.value.trim() || clientIp; // Si no hay nombre, usamos la IP del cliente
       if (!text) return alert("Escribe algo primero.");
-      sendSuggestion(text);
+      await sendSuggestion(text, name);
     });
   
+    // Actualiza las sugerencias restantes
     async function updateSuggestionsLeft() {
       try {
         const res  = await fetch("/status");
@@ -911,12 +926,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   
-    async function sendSuggestion(text) {
+    // Enviar la sugerencia al backend
+    async function sendSuggestion(text, name) {
       try {
         const res  = await fetch("/suggest", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text })
+          body: JSON.stringify({ text, name, liked: localStorage.getItem("hasLiked") === "true" }) // Enviar estado de like y nombre
         });
         if (!res.ok) {
           const err = await res.json();
@@ -934,5 +950,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Init
     checkLikeStatus();
     updateSuggestionsLeft();
+     getClientIp();  // Obtenemos la IP del cliente al inicio
   });
   

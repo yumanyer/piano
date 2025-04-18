@@ -105,6 +105,7 @@ async def handle_like(request):
 
     ip_likes[ip] = True
     total_likes += 1
+    logging.info(f"[LIKE] {ip} ha dado un like. Total likes: {total_likes}")
     return web.json_response({
         "status": "success",
         "message": "Like recibido.",
@@ -137,12 +138,15 @@ async def handle_suggestion(request):
 
         data = await request.json()
         text = data.get("text", "").strip()
+        name = data.get("name", client_ip)  # Capturamos el nombre, si no se proporciona será "Anónimo"
+        liked = data.get("liked", False)  # Si le dieron like
+
         if not text:
             return web.json_response({"success": False, "message": "Texto vacío."}, status=400)
 
-        # Enviar correo
+        # Enviar correo con la sugerencia
         try:
-            msg = MIMEText(f"Sugerencia de IP {client_ip}:\n\n{text}")
+            msg = MIMEText(f"Sugerencia de {name} (IP {client_ip}):\n\n{text}\n\nLike dado: {'Sí' if liked else 'No'}")
             msg["Subject"] = "Nueva sugerencia en Manus-Tiles"
             msg["From"] = EMAIL_USER
             msg["To"] = EMAIL_USER  # Puede ser otro correo si querés
@@ -157,7 +161,7 @@ async def handle_suggestion(request):
 
         # Incrementar contador local si el correo se envió bien
         client_data["suggestions"] += 1
-        logging.info(f"[SUGGESTION] {client_ip} envió: {text}")
+        logging.info(f"[SUGGESTION] {name} ({client_ip}) envió: {text} - Like dado: {'Sí' if liked else 'No'}")
 
         return web.json_response({"success": True, "message": "¡Gracias por tu sugerencia!"})
 
@@ -165,6 +169,9 @@ async def handle_suggestion(request):
         logging.error("Error interno en handle_suggestion: %s", e)
         return web.json_response({"success": False, "message": "Error interno"}, status=500)
 
+# Ruta para obtener la IP del cliente
+async def get_client_ip(request):
+    return web.json_response({"ip": request.remote})
 # --- Inicializar servidor ---
 async def start_servers():
     app = web.Application()
@@ -173,6 +180,7 @@ async def start_servers():
     app.router.add_post("/like", handle_like)
     app.router.add_get("/like/status", like_status)
     app.router.add_post("/suggest", handle_suggestion)
+    app.router.add_get("/get-client-ip", get_client_ip)
     app.router.add_get("/status", handle_status)
     app.router.add_static("/sounds", path=SOUNDS_DIR, name="sounds")
     app.router.add_static("/", path=FRONTEND_DIR, name="frontend_static")
