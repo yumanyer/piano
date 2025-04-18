@@ -872,45 +872,37 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Verificar si el usuario ya ha dado like
-    function checkLikeStatus() {
-        fetch('/check_like', {
-            method: 'GET'
-        }).then(response => {
-            if (response.ok) {
-                heartIcon.style.color = 'red';
-                heartIcon.textContent = '❤️';  // Corazón rojo
-            } else {
-                heartIcon.style.color = '#ccc'; // Corazón gris si no ha dado like
-            }
-        }).catch(error => {
-            console.error('Error al verificar el estado del like:', error);
-        });
-    }
+    async function checkLikeStatus() {
+        const res = await fetch('/check_like');
+        const data = await res.json();
+      
+        const likeButton = document.getElementById('like-btn');
+        const likeCount = document.getElementById('like-count');
+      
+        if (data.already_liked) {
+          likeButton.disabled = true;
+          likeButton.innerText = "❤️ Ya diste like";
+        }
+      
+        likeCount.innerText = `Likes: ${data.total_likes}`;
+      }
+      
 
     // Enviar like al servidor
-    function sendLike() {
-        fetch('/like', {
-            method: 'POST'
-        }).then(response => {
-            if (response.ok) {
-                heartIcon.style.color = 'red';
-                heartIcon.textContent = '❤️';
-                alert('Like recibido.');
-                likeCount++;
-                updateHeartCount();
-            } else {
-                alert('Ya has dado like.');
-            }
-        }).catch(error => {
-            alert('Error al enviar like.');
-        });
-    }
-
-    // Actualizar el contador de likes
-    function updateHeartCount() {
-        heartCount.textContent = likeCount;
-    }
-
+    async function sendLike() {
+        const res = await fetch('/like', { method: 'POST' });
+        const data = await res.json();
+      
+        if (data.success) {
+          document.getElementById('like-btn').disabled = true;
+          document.getElementById('like-btn').innerText = "❤️ Gracias!";
+          document.getElementById('like-count').innerText = `Likes: ${data.total_likes}`;
+        } else {
+          alert(data.message);
+        }
+      }
+      
+ 
     // Actualizar el contador de sugerencias restantes
     function updateSuggestionsLeft() {
         fetch('/status', {
