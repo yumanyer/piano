@@ -871,39 +871,38 @@ let hasLiked = false;  // Variable para verificar si ya se ha dado like
 
 // Función para enviar like
 function sendLike() {
-  const likeButton = document.getElementById('likeButton');
-  const heartIcon = document.getElementById('heartIcon');
-  
-  if (!hasLiked) {  // Solo si no ha dado like
-    likeButton.disabled = true;  // Deshabilita el botón
-    heartIcon.style.color = 'red';  // Cambia el color del corazón al rojo
-    const likeData = JSON.stringify({ type: 'like' });
+    const likeButton = document.getElementById('likeButton');
+    const heartIcon = document.getElementById('heartIcon');
 
-    fetch('/like', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: likeData
-    }).then(response => {
-      if (response.ok) {
-        hasLiked = true;  // Marca que ya se ha dado like
-        alert('Like enviado.');
-      } else {
-        likeButton.disabled = false;
-        heartIcon.style.color = '#ccc';  // Restaurar color si ocurre un error
-        alert('Error al enviar like.');
-      }
-    }).catch(error => {
-      likeButton.disabled = false;
-      heartIcon.style.color = '#ccc';  // Restaurar color si hay error
-      alert('Error al enviar like.');
-    });
-  } else {
-    alert('Ya has dado un like.');
-  }
+    if (!hasLiked) {  // Solo si no ha dado like
+        likeButton.disabled = true;  // Deshabilita el botón
+        heartIcon.style.color = 'red';  // Cambia el color del corazón al rojo
+        const likeData = JSON.stringify({type: 'like'});
+
+        fetch('/like', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: likeData
+        }).then(response => {
+            if (response.ok) {
+                hasLiked = true;  // Marca que ya se ha dado like
+                alert('Like enviado.');
+            } else {
+                likeButton.disabled = false;
+                heartIcon.style.color = '#ccc';  // Restaurar color si ocurre un error
+                alert('Error al enviar like.');
+            }
+        }).catch(error => {
+            likeButton.disabled = false;
+            heartIcon.style.color = '#ccc';  // Restaurar color si hay error
+            alert('Error al enviar like.');
+        });
+    } else {
+        alert('Ya has dado un like.');
+    }
 }
-
   // Enviar sugerencia
   function sendSuggestion() {
     const suggestionButton = document.getElementById('suggestionButton');

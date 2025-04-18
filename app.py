@@ -7,6 +7,9 @@ from aiohttp import web, WSMsgType
 from email.mime.text import MIMEText
 import smtplib
 from dotenv import load_dotenv
+import logging  # Importa logging
+
+logging.basicConfig(level=logging.DEBUG)  # Configura el logging al principio
 
 # Cargar variables de entorno
 load_dotenv()
@@ -116,9 +119,19 @@ async def handle_suggestion(request):
         msg['From'] = EMAIL_USER
         msg['To'] = EMAIL_USER
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(EMAIL_USER, EMAIL_PASS)
-            server.send_message(msg)
+        try: # Encierra la conexión SMTP en un bloque try...except
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                logging.debug("Conectando al servidor SMTP...")
+                server.set_debuglevel(1)  # Activar el modo de depuración de smtplib
+                logging.debug(f"Intentando login con usuario: {EMAIL_USER}")
+                server.login(EMAIL_USER, EMAIL_PASS)
+                logging.debug("Login exitoso.")
+                server.send_message(msg)
+                logging.debug("Correo enviado.")
+
+        except Exception as e:  # Captura cualquier excepción que ocurra
+            logging.error(f"Error al enviar correo: {e}")
+            traceback.print_exc() # Imprime el traceback completo
 
         client_data["suggestions"] += 1
         print(f"Sugerencia de {client_ip}")
@@ -127,7 +140,6 @@ async def handle_suggestion(request):
         print(f"Error en sugerencia: {e}")
         traceback.print_exc()
         return web.json_response({"success": False, "message": "Error interno"}, status=500)
-
 # --- Estado de IP ---
 async def handle_status(request):
     client_ip = request.remote
