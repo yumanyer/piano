@@ -94,25 +94,33 @@
         </div>
     </div>
 
-    <!-- Sección de Feedback (Footer) -->
-    <div class="feedback-section">
-        <div class="feedback-container">
+  <!-- Sección de Feedback (Footer) -->
+<div class="feedback-section">
+    <div class="feedback-container">
 
-            <div class="feedback-column">
-                <h3>¿Te gustó MANUS-TILES?</h3>
-                <div class="heart-container">
-                    <span id="heartIcon" class="animate-heart" style="font-size: 2em; color: #ccc; cursor: pointer;">♥</span>                    <span id="heartCount">0</span>
-                </div>
+        <!-- Columna de Like -->
+        <div class="feedback-column">
+            <h3>¿Te gustó MANUS-TILES?</h3>
+            <div class="heart-container">
+                <span id="heartIcon" class="animate-heart" style="font-size: 2em; color: #ccc; cursor: pointer;">♥</span>
+                <span id="heartCount">0</span>
             </div>
-
-            <div class="feedback-column">
-                <h4>Sugerencias de mejora</h4>
-                <textarea id="suggestionBox" placeholder="Escribe aquí tus ideas para mejorar..."></textarea>
-                <button id="submitSuggestion" class="button">Enviar Sugerencia</button>
-            </div>
-
+            <!-- Botón para enviar Like -->
+            <button id="likeButton" class="button" onclick="sendLike()">Enviar Like</button>
         </div>
+
+        <!-- Columna de sugerencias -->
+        <div class="feedback-column">
+            <h4>Sugerencias de mejora</h4>
+            <!-- Caja de texto para sugerencias -->
+            <textarea id="suggestionBox" placeholder="Escribe aquí tus ideas para mejorar..."></textarea>
+            <!-- Botón para enviar sugerencia -->
+            <button id="suggestionButton" class="button" onclick="sendSuggestion()">Enviar Sugerencia</button>
+        </div>
+
     </div>
+</div>
+
 
 <script src="index.js" defer></script>
 
