@@ -87,20 +87,25 @@ async def aiohttp_websocket_handler(request):
         print(f"WebSocket cerrado: {remote_addr}")
     return ws
 
-# Diccionario para almacenar el estado de likes por IP
+# Para almacenar los likes por IP (en memoria, por simplicidad)
 ip_likes = {}
 
-# Ruta para manejar likes
+# Manejar el "like" desde el frontend
 async def handle_like(request):
-    ip = request.remote  # Obtener la IP del cliente
-    if ip in ip_likes and ip_likes[ip] >= 1:  # Verificar si ya se ha dado like
-        return web.json_response({'error': 'Ya has dado un like.'}, status=400)
 
-    # Registrar el like de la IP
-    ip_likes[ip] = ip_likes.get(ip, 0) + 1
-    return web.json_response({'message': 'Like recibido.'})
-
-
+    client_ip = request.remote
+    if client_ip in ip_likes:
+        return web.json_response({'status': 'error', 'message': 'Ya has dado like.'}, status=400)
+    
+    ip_likes[client_ip] = True  # Marcamos que la IP ya dio like
+    return web.json_response({'status': 'success', 'message': 'Like recibido.'})
+# Ruta para verificar si el usuario ya ha dado like
+async def check_like(request):
+    client_ip = request.remote
+    if client_ip in ip_likes:
+        return web.json_response({'status': 'success', 'message': 'Ya diste like.'})
+    else:
+        return web.json_response({'status': 'error', 'message': 'Aún no has dado like.'})
 # --- Sugerencias ---
 async def handle_suggestion(request):
     try:
@@ -152,6 +157,7 @@ async def start_servers():
     app.router.add_get("/", serve_index)
     app.router.add_get("/ws", aiohttp_websocket_handler)
     app.router.add_post("/like", handle_like)
+    app.router.add_get("/check_like", check_like)
     app.router.add_post("/suggest", handle_suggestion)
     app.router.add_get("/status", handle_status)
     app.router.add_static("/sounds", path=SOUNDS_DIR, name="sounds")

@@ -866,71 +866,88 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-// Añadir el control del "like"
-let hasLiked = false;  // Variable para verificar si ya se ha dado like
+  function checkLikeStatus() {
+    fetch('/check_like', {
+        method: 'GET'
+    }).then(response => {
+        if (response.ok) {
+            const heartIcon = document.getElementById('heartIcon');
+            heartIcon.style.color = 'red';  // Cambia el color del corazón a rojo
+            heartIcon.textContent = '❤️';  // Muestra el corazón rojo
+        }
+    }).catch(error => {
+        console.error('Error al verificar el estado del like:', error);
+    });
+}
 
-// Función para enviar like
 function sendLike() {
     const likeButton = document.getElementById('likeButton');
-    const heartIcon = document.getElementById('heartIcon');
+    likeButton.disabled = true;
 
-    if (!hasLiked) {  // Solo si no ha dado like
-        likeButton.disabled = true;  // Deshabilita el botón
-        heartIcon.style.color = 'red';  // Cambia el color del corazón al rojo
-        const likeData = JSON.stringify({type: 'like'});
-
-        fetch('/like', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: likeData
-        }).then(response => {
-            if (response.ok) {
-                hasLiked = true;  // Marca que ya se ha dado like
-                alert('Like enviado.');
-            } else {
-                likeButton.disabled = false;
-                heartIcon.style.color = '#ccc';  // Restaurar color si ocurre un error
-                alert('Error al enviar like.');
-            }
-        }).catch(error => {
-            likeButton.disabled = false;
-            heartIcon.style.color = '#ccc';  // Restaurar color si hay error
-            alert('Error al enviar like.');
-        });
-    } else {
-        alert('Ya has dado un like.');
-    }
-}
-  // Enviar sugerencia
-  function sendSuggestion() {
-    const suggestionButton = document.getElementById('suggestionButton');
-    const suggestionBox = document.getElementById('suggestionBox'); // Definir suggestionBox correctamente
-  
-    if (suggestionButton && suggestionBox) {
-      suggestionButton.disabled = true;
-  
-      const suggestionData = JSON.stringify({ type: 'suggest', text: suggestionBox.value });
-  
-      fetch('/suggest', {
+    const likeData = JSON.stringify({ type: 'like' });
+    fetch('/like', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+            'Content-Type': 'application/json'
         },
-        body: suggestionData
-      }).then(response => {
+        body: likeData
+    }).then(response => {
         if (response.ok) {
-          alert('Sugerencia enviada.');
+            likeButton.disabled = false;
+            alert('Like enviado.');
+            const heartIcon = document.getElementById('heartIcon');
+            heartIcon.style.color = 'red';  // Cambia el color del corazón a rojo
+            heartIcon.textContent = '❤️';  // Muestra el corazón rojo
         } else {
-          alert('Error al enviar sugerencia.');
+            likeButton.disabled = false;
+            alert('Error al enviar like.');
         }
-      }).catch(error => {
-        alert('Error al enviar sugerencia.');
-      }).finally(() => {
-        suggestionButton.disabled = false;
-      });
-    }
+    }).catch(error => {
+        likeButton.disabled = false;
+        alert('Error al enviar like.');
+    });
+}
+
+// Al cargar la página, verifica si el usuario ya ha dado like
+window.onload = function() {
+    checkLikeStatus();
+};
+
+  // Enviar sugerencia
+  let suggestionsLeft = 3;
+
+  function updateSuggestionsLeft() {
+      const suggestionsRemaining = document.getElementById('suggestionsRemaining');
+      suggestionsRemaining.textContent = `Te quedan ${suggestionsLeft} sugerencias.`;
+  }
+  
+  function sendSuggestion() {
+      const suggestionButton = document.getElementById('submitSuggestion');
+      const suggestionBox = document.getElementById('suggestionBox');
+      if (suggestionButton && suggestionBox && suggestionsLeft > 0) {
+          suggestionButton.disabled = true;
+          const suggestionData = JSON.stringify({ type: 'suggest', text: suggestionBox.value });
+          fetch('/suggest', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: suggestionData
+          }).then(response => {
+              if (response.ok) {
+                  suggestionsLeft--;
+                  updateSuggestionsLeft(); // Actualiza el contador de sugerencias restantes
+                  suggestionButton.disabled = false;
+                  alert('Sugerencia enviada.');
+              } else {
+                  suggestionButton.disabled = false;
+                  alert('Error al enviar sugerencia.');
+              }
+          }).catch(error => {
+              suggestionButton.disabled = false;
+              alert('Error al enviar sugerencia.');
+          });
+      }
   }
   
 // Bloqueo de contexto/teclas (opcional)
