@@ -13,11 +13,10 @@ body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
     font-size: 18px;
-    overflow-y: hidden;
 }
 
 .container {
-    width: 95%; /* Aumentado el ancho del contenedor */
+    width: 100%; /* Aumentado el ancho del contenedor */
     max-width: 1400px; /* Aumentado el ancho máximo */
     display: flex;
     flex-direction: column;
@@ -627,4 +626,102 @@ font-style: italic;
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; border: none; margin: 0;
 }
 #mainPanel:-webkit-full-screen #fullscreenBtn { display: none; }
+/* style.css */
 
+/* ... (tus estilos existentes) ... */
+
+/* Estilos para la sección de feedback como footer */
+.feedback-section {
+    padding: 20px;
+    width: 100%; /* Ocupa todo el ancho */
+    box-sizing: border-box; /* Incluye el padding en el ancho */
+}
+
+.feedback-container {
+
+    display: flex;             /* Distribución horizontal */
+    justify-content: space-around; /* Espacio igual entre columnas */
+    align-items: center;       /* Centra verticalmente */
+    flex-wrap: wrap;         /* Permite que las columnas se envuelvan en pantallas pequeñas */
+}
+
+
+.heart-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+#heartIcon {
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+
+#heartIcon:hover {
+    color: #e74c3c;
+}
+
+#suggestionBox {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+#submitSuggestion {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#submitSuggestion:hover {
+    background-color: #2980b9;
+}
+
+
+.container {
+    flex: 1; /* Expande el container principal para ocupar el espacio restante */
+}
+
+.feedback-section {
+    margin-top: auto; /* Empuja el footer hacia abajo */
+}
+
+/* ANIMACION CORAZON */
+
+
+/* ANIMACION CORAZON */
+.animate-heart {
+    animation: pop 0.5s ease;
+  }
+  
+  @keyframes pop {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.5);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  #heartIcon {
+    transition: color 0.3s ease, transform 0.5s ease; /* Agregada la transición para transform */
+    cursor: pointer;
+    font-size: 2em;
+    color: #ccc;
+  }
+  
+  #heartIcon:hover {
+    color: #e74c3c;
+    transform: scale(1.1); /* Puedes agregar una pequeña escala al hacer hover */
+  }

@@ -4,20 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MANUS-TILES</title>
-
-    <!-- Carga CSS usando ruta relativa (asume style.css está en la misma carpeta 'frontend') -->
     <link rel="stylesheet" href="style.css">
-    <!-- O puedes usar ruta absoluta desde la raíz si prefieres: -->
-    <!-- <link rel="stylesheet" href="/style.css"> -->
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-
-    <!-- *** NUEVO: Scripts de MediaPipe Hands y DrawingUtils desde CDN *** -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-    <!-- ************************************************************** -->
 
 </head>
 <body>
@@ -45,74 +37,84 @@
         </div>
     </div>
 
-<div class="container" style="display: none;"> <!-- Contenedor principal oculto inicialmente -->
-    <div class="header">
-        <div class="question" id="showModal">¿Qué es esto?</div>
-        <div class="title">MANUS-TILES</div>
+    <div class="container" style="display: none;">
+        <div class="header">
+            <div class="question" id="showModal">¿Qué es esto?</div>
+            <div class="title">MANUS-TILES</div>
+        </div>
+
+        <div class="main-content">
+            <!-- Sidebar Izquierda -->
+            <div class="sidebar left-sidebar">
+                <div class="sidebar-title">
+                    <span>IZQUIERDA</span>
+                    <span class="hand-icon">👋</span>
+                </div>
+                <ul class="file-list">
+                    <!-- IDs añadidos finger-item-X donde X es el índice 0-9 -->
+                    <!-- Mapeo: file6 -> index 5, file7 -> index 6, ... file10 -> index 9 -->
+                    <li class="file-item" id="finger-item-5" data-key="6"><span class="finger-status-indicator"></span><span class="file-item-num">6.</span><input class="custom-input" type="file" accept="audio/*"  data-key="5" id="file6"></li>
+                    <li class="file-item" id="finger-item-6" data-key="7"><span class="finger-status-indicator"></span><span class="file-item-num">7.</span><input class="custom-input" type="file" accept="audio/*"  data-key="6"id="file7"></li>
+                    <li class="file-item" id="finger-item-7" data-key="8"><span class="finger-status-indicator"></span><span class="file-item-num">8.</span><input class="custom-input" type="file" accept="audio/*" data-key="7" id="file8"></li>
+                    <li class="file-item" id="finger-item-8" data-key="9"><span class="finger-status-indicator"></span><span class="file-item-num">9.</span><input class="custom-input" type="file" accept="audio/*" data-key="8" id="file9"></li>
+                    <li class="file-item" id="finger-item-9" data-key="10"><span class="finger-status-indicator"></span><span class="file-item-num">10.</span><input class="custom-input" type="file" accept="audio/*" data-key="9" id="file10"></li>
+                </ul>
+            </div>
+
+            <!-- Panel Principal con Video y Canvas -->
+            <div class="main-panel" id="mainPanel">
+                <div class="video-container">
+                    <p id="connectionStatus" class="status-text">Esperando selección de cámara...</p>
+                    <!-- Contenedor para superponer canvas sobre video -->
+                    <div style="position: relative; width: 640px; height: 480px; margin: auto; border: 1px solid rgba(255,255,255,0.3); background-color: rgba(0,0,0,0.3);">
+                        <!-- Video para mostrar el stream de la cámara (oculto visualmente si se dibuja en canvas, pero necesario para MediaPipe) -->
+                        <video id="videoFeed" autoplay playsinline style="display: block; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+                        <!-- Canvas para dibujar los resultados de MediaPipe -->
+                        <canvas id="outputCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+                    </div>
+                </div>
+                <div class="circle-button" id="fullscreenBtn">⛶</div>
+            </div>
+
+            <!-- Sidebar Derecha -->
+            <div class="sidebar right-sidebar">
+                <div class="sidebar-title">
+                    <span>DERECHA</span>
+                    <span class="hand-icon">👋</span>
+                </div>
+                <ul class="file-list">
+                    <!-- Mapeo: file1 -> index 0, file2 -> index 1, ... file5 -> index 4 -->
+                    <li class="file-item" id="finger-item-0" data-key="1"><span class="finger-status-indicator"></span><span class="file-item-num">1.</span><input class="custom-input" type="file" accept="audio/*" data-key="0" id="file1"></li>
+                    <li class="file-item" id="finger-item-1" data-key="2"><span class="finger-status-indicator"></span><span class="file-item-num">2.</span><input class="custom-input" type="file" accept="audio/*" data-key="1" id="file2"></li>
+                    <li class="file-item" id="finger-item-2" data-key="3"><span class="finger-status-indicator"></span><span class="file-item-num">3.</span><input class="custom-input" type="file" accept="audio/*" data-key="2" id="file3"></li>
+                    <li class="file-item" id="finger-item-3" data-key="4"><span class="finger-status-indicator"></span><span class="file-item-num">4.</span><input class="custom-input" type="file" accept="audio/*"  data-key="3" id="file4"></li>
+                    <li class="file-item" id="finger-item-4" data-key="5"><span class="finger-status-indicator"></span><span class="file-item-num">5.</span><input class="custom-input" type="file" accept="audio/*"  data-key="4" id="file5"></li>
+                </ul>
+            </div>
+        </div>
     </div>
 
-    <div class="main-content">
-        <!-- Sidebar Izquierda -->
-        <div class="sidebar left-sidebar">
-             <div class="sidebar-title">
-                <span>IZQUIERDA</span>
-                <span class="hand-icon">👋</span>
-            </div>
-            <ul class="file-list">
-                <!-- IDs añadidos finger-item-X donde X es el índice 0-9 -->
-                <!-- Mapeo: file6 -> index 5, file7 -> index 6, ... file10 -> index 9 -->
-                <li class="file-item" id="finger-item-5"><span class="finger-status-indicator"></span><span class="file-item-num">6.</span><input class="custom-input" type="file" accept="audio/*"  data-key="5" id="file6"></li>
-                <li class="file-item" id="finger-item-6"><span class="finger-status-indicator"></span><span class="file-item-num">7.</span><input class="custom-input" type="file" accept="audio/*"  data-key="6"id="file7"></li>
-                <li class="file-item" id="finger-item-7"><span class="finger-status-indicator"></span><span class="file-item-num">8.</span><input class="custom-input" type="file" accept="audio/*" data-key="7" id="file8"></li>
-                <li class="file-item" id="finger-item-8"><span class="finger-status-indicator"></span><span class="file-item-num">9.</span><input class="custom-input" type="file" accept="audio/*" data-key="8" id="file9"></li>
-                <li class="file-item" id="finger-item-9"><span class="finger-status-indicator"></span><span class="file-item-num">10.</span><input class="custom-input" type="file" accept="audio/*" data-key="9" id="file10"></li>
-            </ul>
-        </div>
+    <!-- Sección de Feedback (Footer) -->
+    <div class="feedback-section">
+        <div class="feedback-container">
 
-        <!-- Panel Principal con Video y Canvas -->
-        <div class="main-panel" id="mainPanel">
-             <div class="video-container">
-                 <p id="connectionStatus" class="status-text">Esperando selección de cámara...</p>
-                 <!-- Contenedor para superponer canvas sobre video -->
-                 <div style="position: relative; margin: auto; border: 1px solid rgba(255,255,255,0.3); background-color: rgba(0,0,0,0.3);">
-                     <!-- Video para mostrar el stream de la cámara (oculto visualmente si se dibuja en canvas, pero necesario para MediaPipe) -->
-                     <video id="videoFeed" autoplay playsinline style="display: block; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
-                     <!-- Canvas para dibujar los resultados de MediaPipe -->
-                     <canvas id="outputCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
-                 </div>
-             </div>
-            <div class="circle-button" id="fullscreenBtn">⛶</div>
-        </div>
-
-        <!-- Sidebar Derecha -->
-        <div class="sidebar right-sidebar">
-             <div class="sidebar-title">
-                <span>DERECHA</span>
-                <span class="hand-icon">👋</span>
+            <div class="feedback-column">
+                <h3>¿Te gustó MANUS-TILES?</h3>
+                <div class="heart-container">
+                    <span id="heartIcon" class="animate-heart" style="font-size: 2em; color: #ccc; cursor: pointer;">♥</span>                    <span id="heartCount">0</span>
+                </div>
             </div>
-            <ul class="file-list">
-                 <!-- Mapeo: file1 -> index 0, file2 -> index 1, ... file5 -> index 4 -->
-                <li class="file-item" id="finger-item-0"><span class="finger-status-indicator"></span><span class="file-item-num">1.</span><input class="custom-input" type="file" accept="audio/*" data-key="0" id="file1"></li>
-                <li class="file-item" id="finger-item-1"><span class="finger-status-indicator"></span><span class="file-item-num">2.</span><input class="custom-input" type="file" accept="audio/*" data-key="1" id="file2"></li>
-                <li class="file-item" id="finger-item-2"><span class="finger-status-indicator"></span><span class="file-item-num">3.</span><input class="custom-input" type="file" accept="audio/*" data-key="2" id="file3"></li>
-                <li class="file-item" id="finger-item-3"><span class="finger-status-indicator"></span><span class="file-item-num">4.</span><input class="custom-input" type="file" accept="audio/*"  data-key="3" id="file4"></li>
-                <li class="file-item" id="finger-item-4"><span class="finger-status-indicator"></span><span class="file-item-num">5.</span><input class="custom-input" type="file" accept="audio/*"  data-key="4" id="file5"></li>
-            </ul>
+
+            <div class="feedback-column">
+                <h4>Sugerencias de mejora</h4>
+                <textarea id="suggestionBox" placeholder="Escribe aquí tus ideas para mejorar..."></textarea>
+                <button id="submitSuggestion" class="button">Enviar Sugerencia</button>
+            </div>
+
         </div>
     </div>
 
-    <!-- Botones del pie de página (Descomentar si los usas) -->
-    <!-- <div class="footer-buttons" style="text-align: center; margin-top: 20px;">
-        <button id="saveButton" class="button">Guardar Sonidos</button>
-        <button id="playButton" class="button blue">Tocar (Fullscreen)</button>
-    </div> -->
-
-</div> <!-- Fin .container -->
-
-<!-- Carga JS al final, usando ruta relativa (asume index.js está en la misma carpeta 'frontend') -->
 <script src="index.js" defer></script>
-<!-- O puedes usar ruta absoluta desde la raíz si prefieres: -->
-<!-- <script src="/index.js" defer></script> -->
 
 </body>
 </html>

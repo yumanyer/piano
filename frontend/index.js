@@ -838,6 +838,33 @@ if (playButton) playButton.addEventListener('click', () => { // Botón Tocar -> 
     toggleFullscreen();
     if (!audioContextResumed) initializeAudio();
 });
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const heartIcon = document.getElementById('heartIcon');
+    const heartCount = document.getElementById('heartCount');
+    const suggestionBox = document.getElementById('suggestionBox');
+    const submitSuggestionButton = document.getElementById('submitSuggestion');
+  
+    let likeCount = 0;
+  
+    heartIcon.addEventListener('click', function() {
+      likeCount++;
+      heartCount.textContent = likeCount;
+      heartIcon.style.color = '#e74c3c'; // Cambia a rojo al dar like
+    });
+  
+    submitSuggestionButton.addEventListener('click', function() {
+      const suggestion = suggestionBox.value;
+      if (suggestion.trim() !== '') {
+        // Aquí puedes enviar la sugerencia a un servidor o almacenarla localmente
+        alert('Sugerencia enviada: ' + suggestion);  // Reemplaza esto con tu lógica de envío
+        suggestionBox.value = ''; // Limpia el textarea
+      } else {
+        alert('Por favor, escribe una sugerencia.');
+      }
+    });
+  });
 // Bloqueo de contexto/teclas (opcional)
 // document.addEventListener("contextmenu", event => event.preventDefault());
 // document.addEventListener("keydown", event => { if ((event.ctrlKey && (event.key === "u" || event.key === "s")) || event.key === "F12") event.preventDefault(); });
