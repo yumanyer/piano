@@ -87,43 +87,38 @@ async def aiohttp_websocket_handler(request):
         print(f"WebSocket cerrado: {remote_addr}")
     return ws
 
+# Estado global
 ip_likes = {}
-total_likes = 0  # Nuevo contador global
+total_likes = 0
 
+# Registrar un like
 async def handle_like(request):
     global total_likes
-    client_ip = request.remote
-    if client_ip in ip_likes:
+    ip = request.remote
+    if ip in ip_likes:
         return web.json_response({
-            'status': 'error',
-            'message': 'Ya has dado like.',
-            'has_liked': True,
-            'total_likes': total_likes
+            "status": "error",
+            "message": "Ya diste like.",
+            "has_liked": True,
+            "total_likes": total_likes
         }, status=400)
 
-    ip_likes[client_ip] = True
-    total_likes += 1  # Incrementar contador
+    ip_likes[ip] = True
+    total_likes += 1
     return web.json_response({
-        'status': 'success',
-        'message': 'Like recibido.',
-        'has_liked': True,
-        'total_likes': total_likes
+        "status": "success",
+        "message": "Like recibido.",
+        "has_liked": True,
+        "total_likes": total_likes
     })
 
-async def check_like(request):
-    client_ip = request.remote
-    has_liked = client_ip in ip_likes
-    return web.json_response({
-        'status': 'success' if has_liked else 'error',
-        'has_liked': has_liked,
-        'total_likes': total_likes
-    })
-
+# Estado del like (inicial y recarga)
 async def like_status(request):
-    client_ip = request.remote
-    client_data = client_limits.get(client_ip, {"likes": 0})
-    liked = client_data["likes"] >= 1
-    return web.json_response({"liked": liked})
+    ip = request.remote
+    return web.json_response({
+        "has_liked": ip in ip_likes,
+        "total_likes": total_likes
+    })
 
 # Ruta para obtener el estado de las sugerencias y likes
 async def handle_status(request):
@@ -177,7 +172,6 @@ async def start_servers():
     app.router.add_get("/ws", aiohttp_websocket_handler)
     app.router.add_post("/like", handle_like)
     app.router.add_get("/like/status", like_status)
-    app.router.add_get("/check_like", check_like)
     app.router.add_post("/suggest", handle_suggestion)
     app.router.add_get("/status", handle_status)
     app.router.add_static("/sounds", path=SOUNDS_DIR, name="sounds")

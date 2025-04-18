@@ -698,30 +698,13 @@ font-style: italic;
 
 
 /* ANIMACION CORAZON */
-.animate-heart {
-    animation: pop 0.5s ease;
-  }
-  
-  @keyframes pop {
-    0% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.5);
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
-
-  #heartIcon {
-    transition: color 0.3s ease, transform 0.5s ease; /* Agregada la transición para transform */
-    cursor: pointer;
+.heart-button {
     font-size: 2em;
     color: #ccc;
+    cursor: pointer;
+    user-select: none;
+  }
+  .heart-button.liked {
+    color: red;
   }
   
-  #heartIcon:hover {
-    color: #e74c3c;
-    transform: scale(1.1); /* Puedes agregar una pequeña escala al hacer hover */
-  }

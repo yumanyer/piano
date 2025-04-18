@@ -95,30 +95,31 @@
     </div>
 
   <!-- Sección de Feedback (Footer) -->
+<!-- Feedback Section -->
 <div class="feedback-section">
     <div class="feedback-container">
-
-        <!-- Columna de Like -->
-        <div class="feedback-column">
-            <h3>¿Te gustó MANUS-TILES?</h3>
-            <div class="heart-container">
-                <span id="heartIcon" class="animate-heart" style="font-size: 2em; color: #ccc; cursor: pointer;">♥</span>
-                <span id="heartCount">0</span>
-            </div>
-            <!-- Botón para enviar Like -->
-            <button id="heartIcon">❤️ <span id="heartCount">0</span></button>
+  
+      <!-- Columna de Like -->
+      <div class="feedback-column">
+        <h3>¿Te gustó MANUS-TILES?</h3>
+        <div class="heart-container">
+          <!-- Un único elemento clickeable -->
+          <span id="heartIcon" class="heart-button">♥</span>
+          <span id="heartCount">0</span>
         </div>
-
-        <!-- Columna de sugerencias -->
-        <div class="feedback-column">
-            <h4>Sugerencias de mejora</h4>
-            <textarea id="suggestionBox" placeholder="Escribe aquí tus ideas para mejorar..."></textarea>
-            <button id="submitSuggestion" class="button">Enviar Sugerencia</button>
-            <p id="suggestionsRemaining">Te quedan 3 sugerencias.</p>
-        </div>
-
+      </div>
+  
+      <!-- Columna de sugerencias -->
+      <div class="feedback-column">
+        <h4>Sugerencias de mejora</h4>
+        <textarea id="suggestionBox" placeholder="Escribe aquí tus ideas para mejorar..."></textarea>
+        <button id="submitSuggestion">Enviar Sugerencia</button>
+        <p id="suggestionsRemaining">Te quedan 3 sugerencias.</p>
+      </div>
+  
     </div>
-</div>
+  </div>
+  
 
 
 <script src="index.js" defer></script>

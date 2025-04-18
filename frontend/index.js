@@ -840,111 +840,99 @@ if (playButton) playButton.addEventListener('click', () => { // Botón Tocar -> 
 });
 
 
-document.addEventListener('DOMContentLoaded', function () {
-    const heartIcon = document.getElementById('heartIcon');
-    const heartCount = document.getElementById('heartCount');
-    const suggestionBox = document.getElementById('suggestionBox');
-    const submitSuggestionButton = document.getElementById('submitSuggestion');
-    const suggestionsRemaining = document.getElementById('suggestionsRemaining');
-
-    let likeCount = 0;
+document.addEventListener("DOMContentLoaded", () => {
+    const heartIcon      = document.getElementById("heartIcon");
+    const heartCount     = document.getElementById("heartCount");
+    const suggestionBox  = document.getElementById("suggestionBox");
+    const submitSugBtn   = document.getElementById("submitSuggestion");
+    const suggestionsRem = document.getElementById("suggestionsRemaining");
+  
     let suggestionsLeft = 3;
-
+  
+    // Al cargar, traé estado de like y actualizá contador/UI
+    async function checkLikeStatus() {
+      try {
+        const res  = await fetch("/like/status");
+        if (!res.ok) throw new Error("No se pudo consultar like");
+        const data = await res.json();
+        updateLikeUI(data.has_liked, data.total_likes);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  
+    // Al clickear corazón
+    heartIcon.addEventListener("click", () => {
+      if (!localStorage.getItem("hasLiked")) {
+        sendLike();
+      } else {
+        alert("Ya diste like ❤️");
+      }
+    });
+  
+    // Enviar like
+    async function sendLike() {
+      try {
+        const res  = await fetch("/like", { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.message);
+          return;
+        }
+        localStorage.setItem("hasLiked", "true");
+        updateLikeUI(true, data.total_likes);
+      } catch (e) {
+        console.error("Error al enviar like:", e);
+      }
+    }
+  
+    // Pinta corazón y número
+    function updateLikeUI(hasLiked, totalLikes) {
+      heartCount.textContent = totalLikes;
+      if (hasLiked) heartIcon.classList.add("liked");
+      else          heartIcon.classList.remove("liked");
+    }
+  
+    // Sugerencias
+    submitSugBtn.addEventListener("click", () => {
+      const text = suggestionBox.value.trim();
+      if (!text) return alert("Escribe algo primero.");
+      sendSuggestion(text);
+    });
+  
+    async function updateSuggestionsLeft() {
+      try {
+        const res  = await fetch("/status");
+        const data = await res.json();
+        suggestionsLeft = 3 - data.suggestions;
+        suggestionsRem.textContent = `Te quedan ${suggestionsLeft} sugerencias.`;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  
+    async function sendSuggestion(text) {
+      try {
+        const res  = await fetch("/suggest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          return alert(err.message || "Error al enviar sugerencia");
+        }
+        alert("Sugerencia enviada 😊");
+        suggestionBox.value = "";
+        updateSuggestionsLeft();
+      } catch (e) {
+        console.error(e);
+        alert("Error al enviar sugerencia");
+      }
+    }
+  
+    // Init
     checkLikeStatus();
     updateSuggestionsLeft();
-
-    heartIcon.addEventListener('click', function () {
-        if (!localStorage.getItem('hasLiked')) {
-            sendLike();
-        } else {
-            alert('Ya diste like ❤️');
-        }
-    });
-
-    submitSuggestionButton.addEventListener('click', function () {
-        const suggestion = suggestionBox.value;
-        if (suggestion.trim() !== '') {
-            sendSuggestion(suggestion);
-        } else {
-            alert('Por favor, escribe una sugerencia.');
-        }
-    });
-
-    async function checkLikeStatus() {
-        try {
-            const res = await fetch("/like/status");
-            if (!res.ok) throw new Error("No se pudo obtener el estado del like");
-            const data = await res.json();
-            if (data.liked) {
-                document.querySelector("#likeButton").disabled = true;
-                document.querySelector("#likeButton").innerText = "Ya votaste ❤️";
-            }
-        } catch (err) {
-            console.error("Error verificando like:", err);
-        }
-    }
-    
-
-    function sendLike() {
-        fetch('/like', { method: 'POST' })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Like fallido");
-                }
-                localStorage.setItem('hasLiked', 'true');
-                return response.json();
-            })
-            .then(data => {
-                updateLikeUI(true, data.total_likes);
-            })
-            .catch(err => {
-                console.error('Error al enviar like:', err);
-            });
-    }
-
-    function updateLikeUI(hasLiked, totalLikes) {
-        likeCount = totalLikes;
-        heartCount.textContent = likeCount;
-        if (hasLiked) {
-            heartIcon.classList.add('liked');
-        } else {
-            heartIcon.classList.remove('liked');
-        }
-    }
-
-    function updateSuggestionsLeft() {
-        fetch('/status', {
-            method: 'GET'
-        }).then(response => response.json())
-            .then(data => {
-                suggestionsLeft = 3 - data.suggestions;
-                suggestionsRemaining.textContent = `Te quedan ${suggestionsLeft} sugerencias.`;
-            }).catch(error => {
-                console.error('Error al obtener el estado de las sugerencias:', error);
-            });
-    }
-
-    function sendSuggestion(suggestionText) {
-        const suggestionData = JSON.stringify({ text: suggestionText });
-        fetch('/suggest', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: suggestionData
-        }).then(response => {
-            if (response.ok) {
-                suggestionsLeft--;
-                updateSuggestionsLeft();
-                alert('Sugerencia enviada.');
-                suggestionBox.value = '';
-            } else {
-                return response.json().then(data => {
-                    alert(data.error || 'Error al enviar sugerencia.');
-                });
-            }
-        }).catch(error => {
-            alert('Error al enviar sugerencia.');
-        });
-    }
-});
+  });
+  
